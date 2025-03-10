@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الأسعار</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
+        }
+
+        h1 {
+            color: #2d3436;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #636e72;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #74b9ff;
+        }
+
+        .result-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-box {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-box span {
+            color: #2d3436;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #00b894;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00a383;
+        }
+
+        @keyframes fade {
+            0% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>حاسبة الكمية</h1>
+        
+        <div class="input-group">
+            <label for="price">السعر الوحدة</label>
+            <input type="number" id="price" step="0.0001" placeholder="أدخل السعر هنا">
+        </div>
+
+        <div class="input-group">
+            <label for="quantity">الكمية</label>
+            <input type="number" id="quantity" placeholder="أدخل الكمية هنا">
+        </div>
+
+        <div class="result-group">
+            <div class="result-box">
+                <span id="total">0.0000</span>
+                <button onclick="copyResult()">نسخ</button>
+            </div>
+            
+            <div class="result-box">
+                <span id="total-after-multiply">0.0000</span>
+                <button onclick="copyMultipliedResult()">نسخ ×560</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const priceInput = document.getElementById('price');
+        const quantityInput = document.getElementById('quantity');
+        const totalSpan = document.getElementById('total');
+        const totalAfterMultiplySpan = document.getElementById('total-after-multiply');
+
+        [priceInput, quantityInput].forEach(input => {
+            input.addEventListener('input', calculateTotal);
+        });
+
+        function calculateTotal() {
+            const price = parseFloat(priceInput.value) || 0;
+            const quantity = parseFloat(quantityInput.value) || 0;
+            let total = price * quantity;
+
+            // تنسيق النتيجة الأصلية
+            totalSpan.textContent = formatNumber(total);
+            
+            // حساب النتيجة بعد الضرب في 560
+            const multipliedTotal = total * 560;
+            totalAfterMultiplySpan.textContent = formatNumber(multipliedTotal);
+        }
+
+        function formatNumber(num) {
+            let formatted = num.toFixed(4);
+            formatted = parseFloat(formatted).toString();
+            
+            if(formatted.indexOf('.') === -1) {
+                formatted += '.0000';
+            }
+            
+            const decimalParts = formatted.split('.');
+            decimalParts[1] = decimalParts[1].padEnd(4, '0').slice(0,4);
+            
+            return decimalParts.join('.');
+        }
+
+        async function copyResult() {
+            await copyToClipboard(totalSpan.textContent);
+        }
+
+        async function copyMultipliedResult() {
+            await copyToClipboard(totalAfterMultiplySpan.textContent);
+        }
+
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showMessage('تم النسخ بنجاح!');
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showMessage('تم النسخ بنجاح!');
+                } catch (err) {
+                    showMessage('فشل النسخ! يرجى المحاولة يدويًا');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showMessage(msg) {
+            const div = document.createElement('div');
+            div.style = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #00b894;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                animation: fade 2s forwards;
+            `;
+            div.textContent = msg;
+            
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                div.remove();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
