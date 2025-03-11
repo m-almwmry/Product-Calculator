@@ -5,26 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حاسبة الأسعار</title>
     <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --calculator-bg: #ffffff;
+            --text-color: #2d3436;
+            --button-bg: #00b894;
+            --border-color: #dfe6e9;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --calculator-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --button-bg: #00a383;
+            --border-color: #404040;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            background-color: var(--bg-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            color: var(--text-color);
+            transition: all 0.3s ease;
         }
 
         .calculator {
-            background-color: #ffffff;
+            background-color: var(--calculator-bg);
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             width: 320px;
+            margin-top: 2rem;
         }
 
         h1 {
-            color: #2d3436;
             text-align: center;
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
@@ -37,17 +55,18 @@
         label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #636e72;
             font-weight: 500;
         }
 
         input {
             width: 100%;
             padding: 0.8rem;
-            border: 2px solid #dfe6e9;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            background-color: var(--calculator-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
         }
 
         input:focus {
@@ -62,7 +81,7 @@
         }
 
         .result-box {
-            background-color: #f8f9fa;
+            background-color: var(--bg-color);
             padding: 1rem;
             border-radius: 6px;
             flex: 1;
@@ -71,23 +90,61 @@
             align-items: center;
         }
 
-        .result-box span {
-            color: #2d3436;
-            font-weight: bold;
-        }
-
         button {
-            background-color: #00b894;
+            background-color: var(--button-bg);
             color: white;
             border: none;
             padding: 0.6rem 1.2rem;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         button:hover {
-            background-color: #00a383;
+            filter: brightness(110%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: var(--button-bg);
+            border: none;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .store-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: var(--button-bg);
+            color: white;
+            border-radius: 30px;
+            margin: 1rem auto;
+            width: fit-content;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .store-button:hover {
+            transform: scale(1.05);
+        }
+
+        .store-button img {
+            width: 24px;
+            height: 24px;
         }
 
         @keyframes fade {
@@ -98,6 +155,8 @@
     </style>
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
     <div class="calculator">
         <h1>حاسبة الكمية</h1>
         
@@ -124,12 +183,38 @@
         </div>
     </div>
 
+    <a href="https://play.google.com/store/apps/details?id=trendcard.yemoney" target="_blank" class="store-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.25-.84-.76-.84-1.35zm13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27zm3.35-4.31c.34.27.59.69.59 1.19 0 .51-.25.92-.58 1.19l-2.89 1.69-2.97-2.97 2.97-2.97 2.88 1.67zm-15.4-8.4L16.86 12 13 15.88 4.76 7.64l5.8-5.8z"/>
+        </svg>
+        برعاية ترند كارد
+    </a>
+
+    <div class="footer">
+        © حقوق الطبع محفوظة 2025
+    </div>
+
     <script>
+        // العناصر المدخلة
         const priceInput = document.getElementById('price');
         const quantityInput = document.getElementById('quantity');
         const totalSpan = document.getElementById('total');
         const totalAfterMultiplySpan = document.getElementById('total-after-multiply');
 
+        // تبديل الوضع الليلي
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (document.body.classList.contains('dark')) {
+                themeToggle.textContent = '☀️';
+                document.body.setAttribute('data-theme', 'dark');
+            } else {
+                themeToggle.textContent = '🌙';
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        // الحسابات التلقائية
         [priceInput, quantityInput].forEach(input => {
             input.addEventListener('input', calculateTotal);
         });
@@ -137,30 +222,25 @@
         function calculateTotal() {
             const price = parseFloat(priceInput.value) || 0;
             const quantity = parseFloat(quantityInput.value) || 0;
-            let total = price * quantity;
+            const total = price * quantity;
 
-            // تنسيق النتيجة الأصلية
             totalSpan.textContent = formatNumber(total);
-            
-            // حساب النتيجة بعد الضرب في 560
-            const multipliedTotal = total * 560;
-            totalAfterMultiplySpan.textContent = formatNumber(multipliedTotal);
+            totalAfterMultiplySpan.textContent = formatNumber(total * 560);
         }
 
+        // تنسيق الأرقام
         function formatNumber(num) {
             let formatted = num.toFixed(4);
             formatted = parseFloat(formatted).toString();
             
-            if(formatted.indexOf('.') === -1) {
-                formatted += '.0000';
-            }
+            const parts = formatted.split('.');
+            if (parts.length === 1) parts.push('0000');
             
-            const decimalParts = formatted.split('.');
-            decimalParts[1] = decimalParts[1].padEnd(4, '0').slice(0,4);
-            
-            return decimalParts.join('.');
+            parts[1] = parts[1].padEnd(4, '0').slice(0,4);
+            return parts.join('.');
         }
 
+        // نظام النسخ
         async function copyResult() {
             await copyToClipboard(totalSpan.textContent);
         }
@@ -189,27 +269,26 @@
             }
         }
 
+        // نظام الإشعارات
         function showMessage(msg) {
             const div = document.createElement('div');
-            div.style = `
+            div.style.cssText = `
                 position: fixed;
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: #00b894;
+                background: var(--button-bg);
                 color: white;
                 padding: 10px 20px;
                 border-radius: 5px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                 animation: fade 2s forwards;
+                z-index: 1000;
             `;
             div.textContent = msg;
-            
             document.body.appendChild(div);
             
-            setTimeout(() => {
-                div.remove();
-            }, 2000);
+            setTimeout(() => div.remove(), 2000);
         }
     </script>
 </body>
