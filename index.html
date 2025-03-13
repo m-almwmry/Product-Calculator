@@ -11,6 +11,7 @@
             --text-color: #2d3436;
             --button-bg: #00b894;
             --border-color: #dfe6e9;
+            --secondary-button: #636e72;
         }
 
         [data-theme="dark"] {
@@ -19,6 +20,7 @@
             --text-color: #ffffff;
             --button-bg: #00a383;
             --border-color: #404040;
+            --secondary-button: #7f8c8d;
         }
 
         body {
@@ -56,6 +58,17 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         input {
@@ -98,6 +111,13 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .secondary-button {
+            background-color: var(--secondary-button);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
         }
 
         button:hover {
@@ -138,15 +158,6 @@
             transition: transform 0.2s ease;
         }
 
-        .store-button:hover {
-            transform: scale(1.05);
-        }
-
-        .store-button img {
-            width: 24px;
-            height: 24px;
-        }
-
         @keyframes fade {
             0% { opacity: 1; }
             90% { opacity: 1; }
@@ -167,7 +178,13 @@
 
         <div class="input-group">
             <label for="quantity">الكمية</label>
-            <input type="number" id="quantity" placeholder="أدخل الكمية هنا">
+            <div class="input-container">
+                <input type="number" id="quantity" placeholder="أدخل الكمية هنا">
+                <div class="input-buttons">
+                    <button class="secondary-button" onclick="pasteQuantity()">لصق</button>
+                    <button class="secondary-button" onclick="clearQuantity()">تفريغ</button>
+                </div>
+            </div>
         </div>
 
         <div class="result-group">
@@ -183,11 +200,11 @@
         </div>
     </div>
 
-    <a href="https://play.google.com/store/apps/details?id=trendcard.yemoney" target="_blank" class="store-button">
+    <a href="https://play.google.com/store" target="_blank" class="store-button">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
             <path d="M3 20.5v-17c0-.59.34-1.11.84-1.35L13.69 12l-9.85 9.85c-.5-.25-.84-.76-.84-1.35zm13.81-5.38L6.05 21.34l8.49-8.49 2.27 2.27zm3.35-4.31c.34.27.59.69.59 1.19 0 .51-.25.92-.58 1.19l-2.89 1.69-2.97-2.97 2.97-2.97 2.88 1.67zm-15.4-8.4L16.86 12 13 15.88 4.76 7.64l5.8-5.8z"/>
         </svg>
-        برعاية ترند كارد
+        تنزيل التطبيق
     </a>
 
     <div class="footer">
@@ -195,7 +212,6 @@
     </div>
 
     <script>
-        // العناصر المدخلة
         const priceInput = document.getElementById('price');
         const quantityInput = document.getElementById('quantity');
         const totalSpan = document.getElementById('total');
@@ -212,6 +228,44 @@
                 themeToggle.textContent = '🌙';
                 document.body.removeAttribute('data-theme');
             }
+        }
+
+        // لصق الكمية (الإصدار المحسّن)
+        async function pasteQuantity() {
+            try {
+                let text = '';
+                // طريقة حديثة للقراءة من الحافظة
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
+                } 
+                // طريقة بديلة للمتصفحات القديمة
+                else {
+                    const textArea = document.createElement('textarea');
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    if (document.execCommand('paste')) {
+                        text = textArea.value;
+                    }
+                    document.body.removeChild(textArea);
+                }
+
+                // تنظيف النص المدخل
+                const cleanedText = text.replace(/,/g, '').trim();
+                if (cleanedText && !isNaN(cleanedText)) {
+                    quantityInput.value = cleanedText;
+                    calculateTotal();
+                } else {
+                    showMessage('البيانات الملصقة غير صالحة');
+                }
+            } catch (err) {
+                showMessage('يرجى السماح بالوصول إلى الحافظة');
+            }
+        }
+
+        // تفريغ حقل الكمية
+        function clearQuantity() {
+            quantityInput.value = '';
+            calculateTotal();
         }
 
         // الحسابات التلقائية
