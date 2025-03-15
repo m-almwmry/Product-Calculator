@@ -182,14 +182,14 @@
                 <input type="number" id="quantity" placeholder="أدخل الكمية هنا">
                 <div class="input-buttons">
                     <button class="secondary-button" onclick="pasteQuantity()">لصق</button>
-                    <button class="secondary-button" onclick="clearQuantity()">حذف</button>
+                    <button class="secondary-button" onclick="clearQuantity()">تفريغ</button>
                 </div>
             </div>
         </div>
 
         <div class="result-group">
             <div class="result-box">
-                <span id="total">0.0000</span>
+                <span id="total">0.000</span>
                 <button onclick="copyResult()">نسخ</button>
             </div>
             
@@ -230,35 +230,16 @@
             }
         }
 
-        // لصق الكمية (الإصدار المحسّن)
+        // لصق الكمية
         async function pasteQuantity() {
             try {
-                let text = '';
-                // طريقة حديثة للقراءة من الحافظة
-                if (navigator.clipboard && navigator.clipboard.readText) {
-                    text = await navigator.clipboard.readText();
-                } 
-                // طريقة بديلة للمتصفحات القديمة
-                else {
-                    const textArea = document.createElement('textarea');
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    if (document.execCommand('paste')) {
-                        text = textArea.value;
-                    }
-                    document.body.removeChild(textArea);
-                }
-
-                // تنظيف النص المدخل
-                const cleanedText = text.replace(/,/g, '').trim();
-                if (cleanedText && !isNaN(cleanedText)) {
-                    quantityInput.value = cleanedText;
+                const text = await navigator.clipboard.readText();
+                if (!isNaN(text)) {
+                    quantityInput.value = text;
                     calculateTotal();
-                } else {
-                    showMessage('البيانات الملصقة غير صالحة');
                 }
             } catch (err) {
-                showMessage('يرجى السماح بالوصول إلى الحافظة');
+                showMessage('فشل في لصق البيانات');
             }
         }
 
@@ -288,7 +269,7 @@
             formatted = parseFloat(formatted).toString();
             
             const parts = formatted.split('.');
-            if (parts.length === 1) parts.push('0000');
+            if (parts.length === 1) parts.push('000');
             
             parts[1] = parts[1].padEnd(4, '0').slice(0,4);
             return parts.join('.');
